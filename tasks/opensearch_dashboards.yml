@@ -1,0 +1,17 @@
+---
+
+- include_tasks: accounts.yml
+  vars:
+    accounts_groups: "{{ opensearch_dashboards_groups }}"
+    accounts_users: "{{ opensearch_dashboards_users }}"
+
+- include_tasks: workspace.yml
+  vars:
+    workspace_fs: "{{ opensearch_dir }}"
+    workspace_directories: "{{ opensearch_dashboards_directories }}"
+
+- include_tasks: install_opensearch_dashboards.yml
+
+- include_tasks: configure_opensearch_dashboards.yml
+
+- include_tasks: service_opensearch_dashboards.yml

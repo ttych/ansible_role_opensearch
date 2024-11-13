@@ -1,0 +1,64 @@
+---
+
+want_opensearch: no
+want_opensearch_dashboards: "{{ want_opensearch }}"
+
+
+opensearch_name: opensearch
+opensearch_dir: "/app/{{ opensearch_name }}"
+
+
+
+opensearch_user: opensearch
+opensearch_uid: 3112
+opensearch_group: "{{ opensearch_user }}"
+opensearch_gid: "{{ opensearch_uid }}"
+opensearch_homedir: "/home/{{ opensearch_user }}"
+opensearch_users:
+  - name: "{{ opensearch_user }}"
+    comment: "{{ opensearch_user }}"
+    group: "{{ opensearch_group }}"
+    home: "{{ opensearch_homedir }}"
+    shell: /usr/sbin/nologin
+    uid: "{{ opensearch_uid }}"
+    home_mode: '0700'
+    password: '*'
+opensearch_groups:
+  - name: "{{ opensearch_group }}"
+    gid: "{{ opensearch_gid }}"
+
+opensearch_directories:
+  - path: "{{ opensearch_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0751"
+
+
+
+opensearch_dashboards_user: opensearch-dashboards
+opensearch_dashboards_uid: 3113
+opensearch_dashboards_group: "{{ opensearch_dashboards_user }}"
+opensearch_dashboards_gid: "{{ opensearch_dashboards_uid }}"
+opensearch_dashboards_homedir: "/home/{{ opensearch_dashboards_user }}"
+opensearch_dashboards_users:
+  - name: "{{ opensearch_dashboards_user }}"
+    comment: "{{ opensearch_dashboards_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    home: "{{ opensearch_dashboards_homedir }}"
+    shell: /usr/sbin/nologin
+    uid: "{{ opensearch_dashboards_uid }}"
+    home_mode: '0700'
+    password: '*'
+opensearch_dashboards_groups:
+  - name: "{{ opensearch_dashboards_group }}"
+    gid: "{{ opensearch_dashboards_gid }}"
+
+opensearch_dashboards_directories:
+  - path: "{{ opensearch_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0751"
+
+
+
+opensearch_admin_user: admin

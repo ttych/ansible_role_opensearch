@@ -1,0 +1,18 @@
+---
+
+- block:
+
+    - include_tasks: context.yml
+
+    - include_tasks: opensearch.yml
+
+    - include_tasks: opensearch_dashboards.yml
+      when: want_opensearch_dashboards
+
+  when: want_opensearch
+
+
+- name: set has_opensearch
+  set_fact:
+    has_opensearch: "{{ want_opensearch }}"
+    has_opensearch_dashboards: "{{ want_opensearch_dashboards }}"

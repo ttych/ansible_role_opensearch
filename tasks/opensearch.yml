@@ -1,0 +1,17 @@
+---
+
+- include_tasks: accounts.yml
+  vars:
+    accounts_groups: "{{ opensearch_groups }}"
+    accounts_users: "{{ opensearch_users }}"
+
+- include_tasks: workspace.yml
+  vars:
+    workspace_fs: "{{ opensearch_dir }}"
+    workspace_directories: "{{ opensearch_directories }}"
+
+- include_tasks: install_opensearch.yml
+
+- include_tasks: configure_opensearch.yml
+
+- include_tasks: service_opensearch.yml
