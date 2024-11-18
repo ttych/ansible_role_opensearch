@@ -1,0 +1,31 @@
+---
+
+opensearch_distfiles: "{{ opensearch_dir }}/distfiles"
+opensearch_ssl_dir: "{{ opensearch_dir }}/ssl"
+opensearch_credentials_dir: "{{ opensearch_dir }}/credentials"
+
+opensearch_common_directories:
+  - path: "{{ opensearch_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0751"
+  - path: "{{ opensearch_distfiles }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0755"
+  - path: "{{ opensearch_ssl_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0750"
+  - path: "{{ opensearch_credentials_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0700"
+
+opensearch_internal_users:
+  - admin
+  - kibanaserver
+  - kibanaro
+  - logstash
+  - readall
+  - snapshotrestore

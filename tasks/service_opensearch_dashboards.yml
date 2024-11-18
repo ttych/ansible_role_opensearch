@@ -1,1 +1,52 @@
 ---
+
+- name: setup systemd service for opensearch-dasbhoards
+  block:
+    - name: deploy opensearch-dashboards service
+      template:
+        src: "opensearch-dashboards/systemd/opensearch-dashboards.service"
+        dest: "{{ systemd_system_lib_dir }}/{{ opensearch_dashboards_service_name }}"
+        owner: root
+        group: root
+        mode: "0644"
+      register: t_opensearch_dashboards_service_deploy
+
+    - name: enable opensearch-dasbhoards service
+      service:
+        name: "{{ opensearch_dashboards_service_name }}"
+        daemon_reload: yes
+        masked: no
+        enabled: yes
+
+    - name: start opensearch-dasbhoards service
+      service:
+        name: "{{ opensearch_dashboards_service_name }}"
+        state: started
+      register: t_opensearch_dashboards_service_start
+
+    - name: restart opensearch-dasbhoards service on change
+      service:
+        name: "{{ opensearch_dashboards_service_name }}"
+        state: restarted
+      when:
+        - not t_opensearch_dashboards_service_start.changed
+        - t_opensearch_dashbords_yml_changed or t_opensearch_dashboards_node_options_changed or t_opensearch_dashboards_service_deploy.changed
+      register: t_opensearch_dashboards_service_restart
+
+    - name: delay after start/restart
+      pause:
+        seconds: "{{ opensearch_dashboards_service_delay }}"
+      when: t_opensearch_dashboards_service_start.changed or t_opensearch_dashboards_service_restart.changed
+
+  when: opensearch_service_type == 'systemd'
+
+
+
+- name: setup daemontools service for opensearch-dasbhoards
+  block:
+    - fail:
+        msg: "not implemented"
+
+  when:
+    - opensearch_dashboards_service_type == 'daemontools'
+    - has_daemontools|d(false)

@@ -1,0 +1,10 @@
+---
+_meta:
+  type: "tenants"
+  config_version: 2
+
+{% for tenant in opensearch_config_security_tenants %}
+{{ tenant.name }}:
+  reserved: {{ tenant.reserved | ternary('true', 'false') }}
+  description: {{ tenant.description }}
+{% endfor %}

@@ -1,1 +1,7 @@
 ---
+
+- include_tasks: configure_opensearch_dashboards_node_options.yml
+
+- include_tasks: configure_opensearch_dashboards_yml.yml
+
+- include_tasks: configure_opensearch_dashboards_ssl.yml

@@ -4,6 +4,8 @@
 
     - include_tasks: context.yml
 
+    - include_tasks: common.yml
+
     - include_tasks: opensearch.yml
 
     - include_tasks: opensearch_dashboards.yml

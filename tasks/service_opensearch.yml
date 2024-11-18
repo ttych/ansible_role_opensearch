@@ -4,7 +4,7 @@
   block:
     - name: deploy opensearch service
       template:
-        src: "systemd/opensearch.service"
+        src: "opensearch/systemd/opensearch.service"
         dest: "{{ systemd_system_lib_dir }}/{{ opensearch_service_name }}"
         owner: root
         group: root
@@ -17,13 +17,26 @@
         daemon_reload: yes
         masked: no
         enabled: yes
+
+    - name: start opensearch service
+      service:
+        name: "{{ opensearch_service_name }}"
         state: started
+      register: t_opensearch_service_start
 
     - name: restart opensearch service on change
       service:
         name: "{{ opensearch_service_name }}"
         state: restarted
-      when: t_opensearch_conf.changed or t_opensearch_service.changed
+      when:
+        - not t_opensearch_service_start.changed
+        - t_opensearch_sysctl_changed or t_opensearch_jvm_options_changed or t_opensearch_opensearch_yml_changed or t_opensearch_performance_analyzer_changed or t_opensearch_reports_scheduler_changed or t_opensearch_observability_changed or t_opensearch_notifications_changed or t_opensearch_service_deploy.changed
+      register: t_opensearch_service_restart
+
+    - name: delay after start/restart
+      pause:
+        seconds: "{{ opensearch_service_delay }}"
+      when: t_opensearch_service_start.changed or t_opensearch_service_restart.changed
 
   when: opensearch_service_type == 'systemd'
 

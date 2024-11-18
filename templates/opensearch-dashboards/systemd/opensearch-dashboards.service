@@ -1,0 +1,26 @@
+[Unit]
+Description="OpenSearch Dashboards"
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+
+User={{ opensearch_dashboards_user }}
+Group={{ opensearch_dashboards_group }}
+
+StandardOutput=journal
+StandardError=inherit
+
+Environment="OSD_PATH_CONF={{ opensearch_dashboards_config_dir }}"
+EnvironmentFile=-/etc/default/opensearch-dashboards
+EnvironmentFile=-{{ opensearch_dashboards_config_dir }}/opensearch-dashboards.env
+
+ExecStart={{ opensearch_dashboards_dist_active }}/bin/opensearch-dashboards
+Restart=always
+
+RuntimeDirectory={{ opensearch_dashboards_name }}
+WorkingDirectory={{ opensearch_dashboards_base_dir }}
+
+[Install]
+WantedBy=multi-user.target

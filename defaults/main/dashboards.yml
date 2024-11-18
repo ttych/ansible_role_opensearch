@@ -1,0 +1,125 @@
+---
+
+opensearch_dashboards_name: opensearch-dashboards
+
+opensearch_dashboards_service_dns: dashboards.local
+
+opensearch_dashboards_user: "{{ opensearch_dashboards_name }}"
+opensearch_dashboards_uid: 3113
+opensearch_dashboards_group: "{{ opensearch_dashboards_user }}"
+opensearch_dashboards_gid: "{{ opensearch_dashboards_uid }}"
+opensearch_dashboards_homedir: "/home/{{ opensearch_dashboards_user }}"
+opensearch_dashboards_users:
+  - name: "{{ opensearch_user }}"
+    comment: "{{ opensearch_user }}"
+    group: "{{ opensearch_group }}"
+    home: "{{ opensearch_homedir }}"
+    shell: /usr/sbin/nologin
+    uid: "{{ opensearch_uid }}"
+    home_mode: '0700'
+    password: '*'
+  - name: "{{ opensearch_dashboards_user }}"
+    comment: "{{ opensearch_dashboards_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    home: "{{ opensearch_dashboards_homedir }}"
+    shell: /usr/sbin/nologin
+    uid: "{{ opensearch_dashboards_uid }}"
+    home_mode: '0700'
+    password: '*'
+opensearch_dashboards_groups:
+  - name: "{{ opensearch_group }}"
+    gid: "{{ opensearch_gid }}"
+  - name: "{{ opensearch_dashboards_group }}"
+    gid: "{{ opensearch_dashboards_gid }}"
+
+opensearch_dashboards_base_dir: "{{ opensearch_dir }}/dashboards"
+opensearch_dashboards_config_dir: "{{ opensearch_dashboards_base_dir }}/config"
+opensearch_dashboards_config_ssl_dir: "{{ opensearch_dashboards_config_dir }}/ssl"
+opensearch_dashboards_data_dir: "{{ opensearch_dashboards_base_dir }}/data"
+opensearch_dashboards_directories:
+  - path: "{{ opensearch_dashboards_base_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    mode: "0755"
+  - path: "{{ opensearch_dashboards_config_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    mode: "0770"
+  - path: "{{ opensearch_dashboards_config_ssl_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    mode: "0750"
+  - path: "{{ opensearch_dashboards_data_dir }}"
+    owner: "{{ opensearch_dashboards_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+    mode: "0750"
+
+opensearch_dashboards_config_node_options: "{{ opensearch_dashboards_config_dir }}/node.options"
+opensearch_dashboards_config_dashboards_yml: "{{ opensearch_dashboards_config_dir }}/opensearch_dashboards.yml"
+
+opensearch_dashboards_pid_file: "/var/run/{{ opensearch_dashboards_name }}/opensearchDashboards.pid"
+opensearch_dashboards_uuid_server_file: "{{ opensearch_dashboards_data_dir }}/uuid"
+
+opensearch_dashboards_ssl_server_cert: "{{ opensearch_dashboards_config_ssl_dir }}/server.crt"
+opensearch_dashboards_ssl_server_key: "{{ opensearch_dashboards_config_ssl_dir }}/server.key"
+
+opensearch_dashboards_conf_node_options_settings: []
+
+opensearch_dashboards_conf_server_port: 5601
+opensearch_dashboards_conf_server_host: "{{ ansible_default_ipv4.address }}"
+opensearch_dashboards_conf_server_basePath: ""
+opensearch_dashboards_conf_server_rewriteBasePath: false
+opensearch_dashboards_conf_server_maxPayloadBytes: 1048576
+opensearch_dashboards_conf_server_name: "{{ ansible_hostname }}"
+opensearch_dashboards_conf_hosts:
+  - "https://{{ opensearch_conf_network_host }}:{{ opensearch_conf_http_port }}"
+  - "https://localhost:{{ opensearch_conf_http_port }}"
+opensearch_dashboards_conf_opensearchDashboards_index: .opensearch_dashboards
+opensearch_dashboards_conf_opensearchDashboards_defaultAppId: home
+opensearch_dashboards_conf_opensearch_username: kibanaserver
+opensearch_dashboards_conf_opensearch_password: "{{ opensearch_internal_user_kibanaserver_password }}"
+opensearch_dashboards_conf_server_ssl_enabled: true
+opensearch_dashboards_conf_i18n_locale: "en"
+opensearch_dashboards_conf_logging_dest: stdout
+opensearch_dashboards_conf_logging_ignoreEnospcError: false
+opensearch_dashboards_conf_logging_silent: false
+opensearch_dashboards_conf_logging_quiet: false
+opensearch_dashboards_conf_logging_verbose: false
+
+opensearch_dashboards_conf_dashboards_yml_settings:
+  - { name: "server.port", value: "{{ opensearch_dashboards_conf_server_port }}" }
+  - { name: "server.host", value: "{{ opensearch_dashboards_conf_server_host }}" }
+  - { name: "server.basePath", value: "\"{{ opensearch_dashboards_conf_server_basePath }}\"", state: "{{ (opensearch_dashboards_conf_server_basePath == '') | ternary('absent', 'present') }}" }
+  - { name: "server.rewriteBasePath", value: "{{ opensearch_dashboards_conf_server_rewriteBasePath | ternary('true', 'false') }}" }
+  - { name: "server.maxPayloadBytes", value: "{{ opensearch_dashboards_conf_server_maxPayloadBytes }}" }
+  - { name: "server.name", value: "{{ opensearch_dashboards_conf_server_name }}" }
+  - { name: "opensearch.hosts", value: "{{ opensearch_dashboards_conf_hosts }}" }
+  - { name: "opensearchDashboards.index", value: "{{ opensearch_dashboards_conf_opensearchDashboards_index }}" }
+  - { name: "opensearchDashboards.defaultAppId", value: "{{ opensearch_dashboards_conf_opensearchDashboards_defaultAppId }}" }
+  - { name: "opensearch.username", value: "{{ opensearch_dashboards_conf_opensearch_username }}" }
+  - { name: "opensearch.password", value: "{{ opensearch_dashboards_conf_opensearch_password }}" }
+  - { name: "server.ssl.enabled", value: "{{ opensearch_dashboards_conf_server_ssl_enabled | ternary('true', 'false') }}" }
+  - { name: "server.ssl.certificate", value: "{{ opensearch_dashboards_ssl_server_cert }}" }
+  - { name: "server.ssl.key", value: "{{ opensearch_dashboards_ssl_server_key }}" }
+  - { name: "i18n.locale", value: "{{ opensearch_dashboards_conf_i18n_locale }}" }
+  - { name: "logging.dest", value: "{{ opensearch_dashboards_conf_logging_dest }}" }
+  - { name: "logging.ignoreEnospcError", value: "{{ opensearch_dashboards_conf_logging_ignoreEnospcError | ternary('true', 'false') }}" }
+  - { name: "logging.silent", value: "{{ opensearch_dashboards_conf_logging_silent | ternary('true', 'false') }}" }
+  - { name: "logging.quiet", value: "{{ opensearch_dashboards_conf_logging_quiet | ternary('true', 'false') }}" }
+  - { name: "logging.verbose", value: "{{ opensearch_dashboards_conf_logging_verbose | ternary('true', 'false') }}" }
+  - { name: "pid.file", value: "{{ opensearch_dashboards_pid_file }}" }
+  - { name: "path.data", value: "{{ opensearch_dashboards_data_dir }}" }
+  # - { name: "uuid.server", value: "{{ opensearch_dashboards_uuid_server_file }}" }
+
+opensearch_dashboards_dist_version: "{{ opensearch_dist_version }}"
+opensearch_dashboards_dist_arch: "{{ (ansible_architecture == 'x86_64') | ternary('x64', ansible_architecture) }}"
+opensearch_dashboards_dist_name: "opensearch-dashboards"
+opensearch_dashboards_dist_name_ver: "{{ opensearch_dashboards_dist_name }}-{{ opensearch_dashboards_dist_version }}"
+opensearch_dashboards_dist_archive: "{{ opensearch_dashboards_dist_name_ver }}-{{ ansible_system | lower }}-{{ opensearch_dashboards_dist_arch }}.tar.gz"
+opensearch_dashboards_dist_url: "https://artifacts.opensearch.org/releases/bundle/{{ opensearch_dashboards_dist_name }}/{{ opensearch_dashboards_dist_version }}/{{ opensearch_dashboards_dist_archive }}"
+opensearch_dashboards_dist_active: "{{ opensearch_dashboards_base_dir }}/{{ opensearch_dashboards_dist_name }}"
+opensearch_dashboards_dist_active_nodejs: "{{ opensearch_dashboards_dist_active }}/node"
+
+opensearch_dashboards_service_type: "{{ ansible_service_mgr }}"
+opensearch_dashboards_service_name: "{{ opensearch_dashboards_name }}.service"
+opensearch_dashboards_service_delay: "{{ opensearch_service_delay }}"

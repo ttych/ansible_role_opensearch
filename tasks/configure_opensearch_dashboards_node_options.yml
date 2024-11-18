@@ -1,0 +1,37 @@
+---
+
+- name: "stat {{ opensearch_dashboards_config_node_options }}"
+  stat:
+    path: "{{ opensearch_dashboards_config_node_options }}"
+  register: t_opensearch_dashboards_config_node_options
+
+- block:
+
+    - name: init node.options
+      copy:
+        src: "{{ opensearch_dashboards_dist_active }}/config/node.options"
+        dest: "{{ opensearch_dashboards_config_node_options }}"
+        remote_src: yes
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_dashboards_group }}"
+        mode: "0640"
+      register: t_opensearch_dashboards_config_node_options_init
+
+  when: not t_opensearch_dashboards_config_node_options.stat.exists
+
+
+- name: update node.options
+  lineinfile:
+    path: "{{ opensearch_dashboards_config_node_options }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: "{{ item.state | d('present') }}"
+    backrefs: "{{ item.backrefs | d(false) }}"
+  loop: "{{ opensearch_dashboards_conf_node_options_settings }}"
+  register: t_opensearch_dashboards_config_node_options_update
+
+
+
+- name: set jvm.options changed
+  set_fact:
+    t_opensearch_dashboards_node_options_changed: "{{ t_opensearch_dashboards_config_node_options_init.changed or t_opensearch_dashboards_config_node_options_update.changed }}"

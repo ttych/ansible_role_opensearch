@@ -1,0 +1,261 @@
+---
+
+want_opensearch: no
+want_opensearch_dashboards: "{{ want_opensearch }}"
+
+
+opensearch_name: opensearch
+opensearch_dir: "/app/{{ opensearch_name }}"
+
+opensearch_node_fqdn: "{{ ansible_fqdn }}"
+opensearch_node_roles:
+  - master
+  - data
+  - ingest
+  - transform
+  # - ml
+opensearch_node_security: false
+opensearch_service_dns: opensearch.local
+
+
+opensearch_user: opensearch
+opensearch_uid: 3112
+opensearch_group: "{{ opensearch_user }}"
+opensearch_gid: "{{ opensearch_uid }}"
+opensearch_homedir: "/home/{{ opensearch_user }}"
+opensearch_users:
+  - name: "{{ opensearch_user }}"
+    comment: "{{ opensearch_user }}"
+    group: "{{ opensearch_group }}"
+    home: "{{ opensearch_homedir }}"
+    shell: /usr/sbin/nologin
+    uid: "{{ opensearch_uid }}"
+    home_mode: '0700'
+    password: '*'
+opensearch_groups:
+  - name: "{{ opensearch_group }}"
+    gid: "{{ opensearch_gid }}"
+
+opensearch_base_dir: "{{ opensearch_dir }}/opensearch"
+opensearch_config_dir: "{{ opensearch_base_dir }}/config"
+opensearch_config_ssl_dir: "{{ opensearch_config_dir }}/ssl"
+opensearch_config_security_dir: "{{ opensearch_config_dir }}/opensearch-security/"
+opensearch_data_dir: "{{ opensearch_base_dir }}/data"
+opensearch_logs_dir: "{{ opensearch_base_dir }}/logs"
+opensearch_directories:
+  - path: "{{ opensearch_base_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0755"
+  - path: "{{ opensearch_config_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0770"
+  - path: "{{ opensearch_data_dir }}"
+    owner: "{{ opensearch_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0750"
+  - path: "{{ opensearch_logs_dir }}"
+    owner: "{{ opensearch_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0750"
+  - path: "{{ opensearch_config_ssl_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0750"
+  - path: "{{ opensearch_config_security_dir }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0750"
+
+opensearch_config_security_limits:
+  - domain: opensearch
+    type: soft
+    item: memlock
+    value: unlimited
+  - domain: opensearch
+    type: hard
+    item: memlock
+    value: unlimited
+
+opensearch_config_jvm_options: "{{ opensearch_config_dir }}/jvm.options"
+opensearch_config_log4j2_properties: "{{ opensearch_config_dir }}/log4j2.properties"
+opensearch_config_opensearch_yml: "{{ opensearch_config_dir }}/opensearch.yml"
+opensearch_config_security_files:
+  - action_groups.yml
+  - allowlist.yml
+  - audit.yml
+  - config.yml
+  - internal_users.yml
+  - nodes_dn.yml
+  # - opensearch.yml.example
+  - roles_mapping.yml
+  - roles.yml
+  - tenants.yml
+  - whitelist.yml
+
+opensearch_dist_version: 2.18.0
+opensearch_dist_arch: "{{ (ansible_architecture == 'x86_64') | ternary('x64', ansible_architecture) }}"
+opensearch_dist_name: "opensearch"
+opensearch_dist_name_ver: "{{ opensearch_dist_name }}-{{ opensearch_dist_version }}"
+opensearch_dist_archive: "{{ opensearch_dist_name_ver }}-{{ ansible_system | lower }}-{{ opensearch_dist_arch }}.tar.gz"
+opensearch_dist_url: "https://artifacts.opensearch.org/releases/bundle/{{ opensearch_dist_name }}/{{ opensearch_dist_version }}/{{ opensearch_dist_archive }}"
+opensearch_dist_active: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+opensearch_dist_active_security_tools: "{{ opensearch_dist_active }}/plugins/opensearch-security/tools"
+opensearch_dist_active_hash: "{{ opensearch_dist_active_security_tools }}/hash.sh"
+opensearch_dist_active_security_admin: "{{ opensearch_dist_active_security_tools }}/securityadmin.sh"
+opensearch_dist_active_jdk: "{{ opensearch_dist_active }}/jdk"
+
+opensearch_conf_jvm_xms: 4g
+opensearch_conf_jvm_xmx: 4g
+opensearch_conf_jvm_heap_dump_on_out_of_memory_error: false
+opensearch_conf_jvm_options:
+  - { name: xms, regexp: '^-Xms[0-9]+[gGmM]?$', line: '-Xms{{ opensearch_conf_jvm_xms }}' }
+  - { name: xmx, regexp: '^-Xmx[0-9]+[gGmM]?$', line: '-Xmx{{ opensearch_conf_jvm_xmx }}' }
+  - { name: HeapDumpOnOutOfMemoryError, regexp: '^-XX:[+-]HeapDumpOnOutOfMemoryError', line: '-XX:{{ opensearch_conf_jvm_heap_dump_on_out_of_memory_error | ternary("+", "-") }}HeapDumpOnOutOfMemoryError' }
+  - { name: ErrorFile, regexp: '^-XX:ErrorFile=', line: '-XX:ErrorFile={{ opensearch_logs_dir }}/hs_err_pid%p.log' }
+  - { name: 8:Xloggc, regexp: '^8:-Xloggc:', line: '8:-Xloggc:{{ opensearch_logs_dir }}/gc.log' }
+  - { name: 9Xlog, regexp: '^9-:-Xlog:', line: '9-:-Xlog:gc*,gc+age=trace,safepoint:file={{ opensearch_logs_dir }}/gc.log:utctime,pid,tags:filecount=32,filesize=64m' }
+
+opensearch_conf_log4j2_properties_settings: []
+
+opensearch_conf_node_name: "{{ ansible_hostname }}"
+opensearch_conf_node_roles: "{{ opensearch_node_roles }}"
+opensearch_conf_network_host: "{{ opensearch_node_fqdn }}"
+opensearch_conf_http_port: 9200
+opensearch_conf_discovery_type: single-node
+opensearch_conf_discovery_seed_hosts: ["127.0.0.1", "[::1]"]
+opensearch_conf_cluster_initial_cluster_manager_nodes: []
+opensearch_conf_bootstrap_memory_lock: true
+opensearch_conf_action_destructive_requires_name: false
+opensearch_conf_plugins_security_disabled: false
+opensearch_conf_plugins_security_ssl_http_enabled: true
+opensearch_conf_plugins_security_allow_default_init_securityindex: true
+opensearch_conf_plugins_security_audit_type: internal_opensearch
+opensearch_conf_plugins_security_enable_snapshot_restore_privilege: true
+opensearch_conf_plugins_security_check_snapshot_restore_write_privileges: true
+opensearch_conf_plugins_security_authcz_admin_dn:
+  - "{{ opensearch_ssl_admin_dn }}"
+opensearch_conf_plugins_security_nodes_dn:
+  - "{{ opensearch_ssl_node_dn }}"
+opensearch_conf_plugins_security_restapi_roles_enabled:
+  - all_access
+  - security_rest_api_access
+opensearch_conf_ssl_transport_cert: "{{ opensearch_config_ssl_dir }}/transport.crt"
+opensearch_conf_ssl_transport_key: "{{ opensearch_config_ssl_dir }}/transport.key"
+opensearch_conf_ssl_transport_ca_cert: "{{ opensearch_config_ssl_dir }}/transport.ca.crt"
+opensearch_conf_ssl_http_cert: "{{ opensearch_config_ssl_dir }}/http.crt"
+opensearch_conf_ssl_http_key: "{{ opensearch_config_ssl_dir }}/http.key"
+opensearch_conf_ssl_http_ca_cert: "{{ opensearch_config_ssl_dir }}/http.ca.crt"
+opensearch_conf_opensearch_yml_settings:
+  - { name: "cluster.name", value: "{{ opensearch_cluster_name }}" }
+  - { name: "node.name", value: "{{ opensearch_conf_node_name }}" }
+  - { name: "node.roles", value: "{{ opensearch_conf_node_roles }}" }
+  - { name: "node.attr.rack", value: "{{ opensearch_conf_node_attr_rack | d(None) }}", state: "{{ opensearch_conf_node_attr_rack | d(None) | ternary('present', 'absent') }}" }
+  - { name: "path.data", value: "{{ opensearch_data_dir }}" }
+  - { name: "path.logs", value: "{{ opensearch_logs_dir }}" }
+  - { name: "bootstrap.memory_lock", value: "{{ opensearch_conf_bootstrap_memory_lock | ternary('true', 'false') }}" }
+  - { name: "network.host", value: "{{ opensearch_conf_network_host }}" }
+  - { name: "http.port", value: "{{ opensearch_conf_http_port }}" }
+  - { name: "discovery.seed_hosts", value: "{{ opensearch_conf_discovery_seed_hosts }}" }
+  - { name: "discovery.type", value: "{{ opensearch_conf_discovery_type | d(None) }}", state: "{{ ((opensearch_conf_discovery_type | d('')) != '') | ternary('present', 'absent') }}" }
+  - { name: "cluster.initial_cluster_manager_nodes", value: "{{  opensearch_conf_cluster_initial_cluster_manager_nodes }}", state: "{{ ((opensearch_conf_discovery_type|d('')) == 'single-node') | ternary('absent', 'present') }}" }
+  - { name: "gateway.recover_after_nodes", value: "{{ opensearch_conf_gateway_recover_after_nodes | d(None) }}", state: "{{ ((opensearch_conf_gateway_recover_after_nodes | d('')) != '') | ternary('present', 'absent') }}" }
+  - { name: "action.destructive_requires_name", value: "{{ opensearch_conf_action_destructive_requires_name | ternary('true', 'false') }}" }
+  - { name: "plugins.security.disabled", value: "{{ opensearch_conf_plugins_security_disabled | ternary('true', 'false') }}" }
+  #
+  - { name: "plugins.security.ssl.transport.pemcert_filepath", value: "{{ opensearch_conf_ssl_transport_cert }}" }
+  - { name: "plugins.security.ssl.transport.pemkey_filepath", value: "{{ opensearch_conf_ssl_transport_key }}" }
+  - { name: "plugins.security.ssl.transport.pemtrustedcas_filepath", value: "{{ opensearch_conf_ssl_transport_ca_cert }}" }
+  - { name: "plugins.security.ssl.http.enabled", value: "{{ opensearch_conf_plugins_security_ssl_http_enabled | ternary('true', 'false') }}" }
+  - { name: "plugins.security.ssl.http.pemcert_filepath", value: "{{ opensearch_conf_ssl_http_cert }}" }
+  - { name: "plugins.security.ssl.http.pemkey_filepath", value: "{{ opensearch_conf_ssl_http_key }}" }
+  - { name: "plugins.security.ssl.http.pemtrustedcas_filepath", value: "{{ opensearch_conf_ssl_http_ca_cert }}" }
+  - { name: "plugins.security.allow_default_init_securityindex", value: "{{ opensearch_conf_plugins_security_allow_default_init_securityindex | ternary('true', 'false') }}" }
+  - { name: "plugins.security.authcz.admin_dn", value: "{{ opensearch_conf_plugins_security_authcz_admin_dn }}" }
+  - { name: "plugins.security.nodes_dn", value: "{{ opensearch_conf_plugins_security_nodes_dn }}" }
+  - { name: "plugins.security.audit.type", value: "{{ opensearch_conf_plugins_security_audit_type }}" }
+# plugins.security.audit.enable_rest: true
+# plugins.security.audit.enable_transport: true
+  - { name: "plugins.security.enable_snapshot_restore_privilege", value: "{{ opensearch_conf_plugins_security_enable_snapshot_restore_privilege | ternary('true', 'false') }}" }
+  - { name: "plugins.security.check_snapshot_restore_write_privileges", value: "{{ opensearch_conf_plugins_security_check_snapshot_restore_write_privileges | ternary('true', 'false') }}" }
+  - { name: "plugins.security.restapi.roles_enabled", value: "{{ opensearch_conf_plugins_security_restapi_roles_enabled }}" }
+
+opensearch_config_security_audit_enabled: yes
+opensearch_config_security_audit_enable_rest: yes
+opensearch_config_security_audit_disabled_rest_categories:
+  - AUTHENTICATED
+  - GRANTED_PRIVILEGES
+opensearch_config_security_audit_enable_transport: yes
+opensearch_config_security_audit_disabled_transport_categories:
+  - AUTHENTICATED
+  - GRANTED_PRIVILEGES
+opensearch_config_security_audit_ignore_users:
+  - admin
+  - kibanaserver
+opensearch_config_security_audit_compliance_enabled: yes
+opensearch_config_security_audit_compliance_read_ignore_users:
+  - admin
+  - kibanaserver
+opensearch_config_security_audit_compliance_write_ignore_users:
+  - admin
+  - kibanaserver
+opensearch_config_security_tenants:
+  - name: default
+    reserved: no
+    description: default
+opensearch_config_security_internal_users:
+  - name: admin
+    hash: "{{ opensearch_internal_user_admin_password_hash }}"
+    reserved: true
+    backend_roles:
+      - "admin"
+    description: "admin"
+  - name: kibanaserver
+    hash: "{{ opensearch_internal_user_kibanaserver_password_hash }}"
+    reserved: true
+    description: "OpenSearch Dashboards user"
+  - name: kibanaro
+    hash: "{{ opensearch_internal_user_kibanaro_password_hash }}"
+    reserved: false
+    backend_roles:
+      - "kibanauser"
+      - "readall"
+    attributes:
+      attribute1: "value1"
+      attribute2: "value2"
+      attribute3: "value3"
+    description: "OpenSearch Dashboards read only user"
+  - name: logstash
+    hash: "{{ opensearch_internal_user_logstash_password_hash }}"
+    reserved: false
+    backend_roles:
+      - "logstash"
+    description: "logstash user"
+  - name: readall
+    hash: "{{ opensearch_internal_user_readall_password_hash }}"
+    reserved: false
+    backend_roles:
+      - "readall"
+    description: "readall user"
+  - name: snapshotrestore
+    hash: "{{ opensearch_internal_user_snapshotrestore_password_hash }}"
+    reserved: false
+    backend_roles:
+      - "snapshotrestore"
+    description: "snapshotrestore user"
+  # - name: anomalyadmin
+  #   hash: "{{ opensearch_internal_user_anomalyadmin_password_hash }}"
+  #   reserved: false
+  #   opendistro_security_roles:
+  #     - "anomaly_full_access"
+  #   description: "anomaly admin user"
+
+opensearch_service_type: "{{ ansible_service_mgr }}"
+opensearch_service_name: "{{ opensearch_name }}.service"
+opensearch_service_delay: 10
+
+
+
+
+opensearch_admin_user: admin

@@ -1,0 +1,77 @@
+---
+
+- block:
+
+    - name: stat admin password file
+      stat:
+        path: "{{ opensearch_config_security_dir }}/internal_users.yml"
+      register: t_opensearch_config_security_init
+
+
+    - name: get current security settings
+      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -backup {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
+      environment:
+        OPENSEARCH_JAVA_HOME: "{{ opensearch_dist_active_jdk }}"
+      become: yes
+      become_user: "{{ opensearch_admin_user }}"
+      failed_when: no
+      changed_when: no
+      register: t_opensearch_security_get
+
+
+    - fail:
+        msg: "failed to get current security state:\n{{ t_opensearch_security_get }}"
+      when:
+        - t_opensearch_security_get.rc != 0
+        - t_opensearch_config_security_init.stat.exists
+
+
+    # - name: init security files from dist
+    #   copy:
+    #     src: "{{ opensearch_dist_active }}/config/opensearch-security/{{ item }}"
+    #     dest: "{{ opensearch_config_security_dir }}/{{ item }}"
+    #     owner: "{{ opensearch_admin_user }}"
+    #     group: "{{ opensearch_group }}"
+    #     mode: "0600"
+    #     remote_src: yes
+    #   loop: "{{ opensearch_config_security_files }}"
+    #   when:
+    #     - t_opensearch_security_get.rc != 0
+    #     - not t_opensearch_config_security_admin_password_file.stat.exists
+
+
+    - name: init security files from base
+      template:
+        src: "opensearch/opensearch-security/{{ item }}"
+        dest: "{{ opensearch_config_security_dir }}/{{ item }}"
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_group }}"
+        mode: "0600"
+      loop: "{{ opensearch_config_security_files }}"
+      when:
+        - t_opensearch_security_get.rc != 0
+        - not t_opensearch_config_security_init.stat.exists
+
+
+    - include_tasks: configure_opensearch_security_internal_config_merge.yml
+      loop: "{{ opensearch_config_security_files }}"
+      vars:
+        security_config_file: "{{ item }}"
+
+
+    - name: set current security settings
+      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -cd {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
+      environment:
+        OPENSEARCH_JAVA_HOME: "{{ opensearch_dist_active_jdk }}"
+      become: yes
+      become_user: "{{ opensearch_admin_user }}"
+      register: t_opensearch_security_set
+
+  when:
+    - opensearch_node_security or (opensearch_conf_discovery_type == 'single-node')
+
+
+
+- name: set opensearch/security changed
+  set_fact:
+    t_opensearch_security_changed: false

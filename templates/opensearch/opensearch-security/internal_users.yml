@@ -1,0 +1,24 @@
+---
+# This is the internal user database
+# The hash value is a bcrypt hash and can be generated with plugin/tools/hash.sh
+
+_meta:
+  type: "internalusers"
+  config_version: 2
+
+# Define your internal users here
+{% for user in opensearch_config_security_internal_users %}
+{{ user.name }}:
+  hash: "{{ user.hash }}"
+  reserved: {{ user.reserved | ternary('true', 'false') }}
+{% if 'opendistro_security_roles' in user %}
+  opendistro_security_roles: {{ user.opendistro_security_roles }}
+{% endif %}
+{% if 'attributes' in user %}
+  attributes: {{ user.attributes }}
+{% endif %}
+{% if 'backend_roles' in user %}
+  backend_roles: {{ user.backend_roles }}
+{% endif %}
+  description: {{ user.description }}
+{% endfor %}

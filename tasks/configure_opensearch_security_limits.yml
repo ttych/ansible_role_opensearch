@@ -1,0 +1,11 @@
+---
+
+- name: ensure security limits for opensearch
+  pam_limits:
+    domain: "{{ item.domain }}"
+    limit_type: "{{ item.type }}"
+    limit_item: "{{ item.item }}"
+    value: "{{ item.value }}"
+    use_max: "{{ item.use_max | d(omit) }}"
+  loop: "{{ opensearch_config_security_limits }}"
+  register: t_opensearch_security_limits_changed
