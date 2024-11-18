@@ -1,1 +1,39 @@
 ---
+
+- name: setup systemd service for opensearch
+  block:
+    - name: deploy opensearch service
+      template:
+        src: "systemd/opensearch.service"
+        dest: "{{ systemd_system_lib_dir }}/{{ opensearch_service_name }}"
+        owner: root
+        group: root
+        mode: "0644"
+      register: t_opensearch_service_deploy
+
+    - name: enable opensearch service
+      service:
+        name: "{{ opensearch_service_name }}"
+        daemon_reload: yes
+        masked: no
+        enabled: yes
+        state: started
+
+    - name: restart opensearch service on change
+      service:
+        name: "{{ opensearch_service_name }}"
+        state: restarted
+      when: t_opensearch_conf.changed or t_opensearch_service.changed
+
+  when: opensearch_service_type == 'systemd'
+
+
+
+- name: setup daemontools service for opensearch
+  block:
+    - fail:
+        msg: "not implemented"
+
+  when:
+    - opensearch_service_type == 'daemontools'
+    - has_daemontools|d(false)

@@ -1,0 +1,5 @@
+---
+
+- debug:
+    msg: "test"
+  register: t_opensearch_conf

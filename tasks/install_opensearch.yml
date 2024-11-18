@@ -1,1 +1,54 @@
 ---
+
+- name: check dist availability
+  stat:
+    path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}/bin/opensearch"
+  register: t_opensearch_dist_available
+
+- block:
+    - name: check dist version
+      shell:
+        cmd: ./bin/opensearch --version | sed -e 's/^Version. \([0-9.]*\),.*$/\1/g'
+      args:
+        chdir: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+      changed_when: no
+      register: t_opensearch_dist_version
+
+    - name: clean wrong dist
+      file:
+        path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+        state: absent
+      when: t_opensearch_dist_version.rc != 0 or t_opensearch_dist_version.stdout != opensearch_dist_version
+
+  when: t_opensearch_dist_available.stat.exists
+
+- block:
+    - name: download opensearch distribution
+      get_url:
+        url: "{{ opensearch_dist_url }}"
+        dest: "{{ opensearch_distfiles }}/{{ opensearch_dist_archive }}"
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_group }}"
+        mode: "0644"
+
+    - name: extract archive
+      unarchive:
+        remote_src: yes
+        src: "{{ opensearch_distfiles }}/{{ opensearch_dist_archive }}"
+        dest: "{{ opensearch_base_dir }}"
+        mode: "go-w"
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_group }}"
+      register: t_opensearch_dist_extract
+
+    - name: link to active
+      file:
+        src: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+        dest: "{{ opensearch_dist_active }}"
+        force: yes
+        state: link
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_group }}"
+      register: t_opensearch_dist_active
+
+  when: not t_opensearch_dist_available.stat.exists or t_opensearch_dist_version.rc != 0 or t_opensearch_dist_version.stdout != opensearch_dist_version

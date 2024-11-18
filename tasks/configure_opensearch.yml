@@ -1,1 +1,19 @@
 ---
+
+- include_tasks: configure_opensearch_sysctl.yml
+
+- include_tasks: configure_opensearch_jvm_options.yml
+
+- include_tasks: configure_opensearch_yml.yml
+
+- include_tasks: configure_opensearch_log4j2.yml
+
+- include_tasks: configure_opensearch_security.yml
+
+- include_tasks: configure_opensearch_performance_analyzer.yml
+
+- include_tasks: configure_opensearch_reports_scheduler.yml
+
+- include_tasks: configure_opensearch_observability.yml
+
+- include_tasks: configure_opensearch_notifications.yml
