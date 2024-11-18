@@ -1,0 +1,6 @@
+---
+
+
+- name: set opensearch observability changed
+  set_fact:
+    t_opensearch_observability_changed: false

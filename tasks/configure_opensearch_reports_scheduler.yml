@@ -1,0 +1,5 @@
+---
+
+- name: set opensearch reports_scheduler changed
+  set_fact:
+    t_opensearch_reports_scheduler_changed: false

@@ -1,0 +1,10 @@
+---
+
+
+# security
+# /app/opensearch/opensearch/opensearch/plugins/opensearch-security/tools/install_demo_configuration.sh
+
+
+- name: set opensearch/security changed
+  set_fact:
+    t_opensearch_security_changed: false

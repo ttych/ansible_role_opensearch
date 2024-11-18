@@ -1,0 +1,5 @@
+---
+
+- name: set opensearch performance_analyzer changed
+  set_fact:
+    t_opensearch_performance_analyzer_changed: false

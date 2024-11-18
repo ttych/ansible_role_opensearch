@@ -1,0 +1,21 @@
+---
+
+- name: Get the current value of vm.max_map_count
+  command: "sysctl -n vm.max_map_count"
+  changed_when: no
+  register: t_opensearch_sysctl_max_map_count
+
+- name: Update vm.max_map_count if it is less than 262144
+  ansible.builtin.sysctl:
+    name: vm.max_map_count
+    value: 262144
+    sysctl_set: true
+    state: present
+  register: t_opensearch_sysctl_max_map_count
+  when: t_opensearch_sysctl_max_map_count.stdout | int < 262144
+
+
+
+- name: set systcl changed
+  set_fact:
+    t_opensearch_sysctl_changed: "(t_opensearch_sysctl_max_map_count is defined) and (t_opensearch_sysctl_max_map_count.changed)"

@@ -1,0 +1,25 @@
+---
+
+- name: "stat {{ opensearch_config_log4j2_properties }}"
+  stat:
+    path: "{{ opensearch_config_log4j2_properties }}"
+  register: t_opensearch_config_log4j2_properties
+
+- block:
+    - name: init log4j2.properties
+      copy:
+        src: "{{ opensearch_dist_active }}/config/log4j2.properties"
+        dest: "{{ opensearch_config_log4j2_properties }}"
+        remote_src: yes
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_group }}"
+        mode: "0640"
+      register: t_opensearch_log4j2_properties_init
+
+  when: not t_opensearch_config_log4j2_properties.stat.exists
+
+
+
+- name: set jvm.options changed
+  set_fact:
+    t_opensearch_log4j2_properties_changed: t_opensearch_jvm_options_init.changed
