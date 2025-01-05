@@ -141,12 +141,14 @@ opensearch_conf_plugins_security_nodes_dn:
 opensearch_conf_plugins_security_restapi_roles_enabled:
   - all_access
   - security_rest_api_access
-opensearch_conf_ssl_transport_cert: "{{ opensearch_config_ssl_dir }}/transport.crt"
-opensearch_conf_ssl_transport_key: "{{ opensearch_config_ssl_dir }}/transport.key"
-opensearch_conf_ssl_transport_ca_cert: "{{ opensearch_config_ssl_dir }}/transport.ca.crt"
-opensearch_conf_ssl_http_cert: "{{ opensearch_config_ssl_dir }}/http.crt"
-opensearch_conf_ssl_http_key: "{{ opensearch_config_ssl_dir }}/http.key"
-opensearch_conf_ssl_http_ca_cert: "{{ opensearch_config_ssl_dir }}/http.ca.crt"
+opensearch_ssl_transport_cert: "{{ opensearch_config_ssl_dir }}/transport.crt"
+opensearch_ssl_transport_key: "{{ opensearch_config_ssl_dir }}/transport.key"
+opensearch_ssl_transport_ca_cert: "{{ opensearch_config_ssl_dir }}/transport.ca.crt"
+opensearch_ssl_http_cert: "{{ opensearch_config_ssl_dir }}/http.crt"
+opensearch_ssl_http_key: "{{ opensearch_config_ssl_dir }}/http.key"
+opensearch_ssl_http_ca_cert: "{{ opensearch_config_ssl_dir }}/http.ca.crt"
+opensearch_ssl_admin_cert: "{{ opensearch_config_ssl_dir }}/admin.crt"
+opensearch_ssl_admin_key: "{{ opensearch_config_ssl_dir }}/admin.key"
 opensearch_conf_opensearch_yml_settings:
   - { name: "cluster.name", value: "{{ opensearch_cluster_name }}" }
   - { name: "node.name", value: "{{ opensearch_conf_node_name }}" }
@@ -164,13 +166,13 @@ opensearch_conf_opensearch_yml_settings:
   - { name: "action.destructive_requires_name", value: "{{ opensearch_conf_action_destructive_requires_name | ternary('true', 'false') }}" }
   - { name: "plugins.security.disabled", value: "{{ opensearch_conf_plugins_security_disabled | ternary('true', 'false') }}" }
   #
-  - { name: "plugins.security.ssl.transport.pemcert_filepath", value: "{{ opensearch_conf_ssl_transport_cert }}" }
-  - { name: "plugins.security.ssl.transport.pemkey_filepath", value: "{{ opensearch_conf_ssl_transport_key }}" }
-  - { name: "plugins.security.ssl.transport.pemtrustedcas_filepath", value: "{{ opensearch_conf_ssl_transport_ca_cert }}" }
+  - { name: "plugins.security.ssl.transport.pemcert_filepath", value: "{{ opensearch_ssl_transport_cert }}" }
+  - { name: "plugins.security.ssl.transport.pemkey_filepath", value: "{{ opensearch_ssl_transport_key }}" }
+  - { name: "plugins.security.ssl.transport.pemtrustedcas_filepath", value: "{{ opensearch_ssl_transport_ca_cert }}" }
   - { name: "plugins.security.ssl.http.enabled", value: "{{ opensearch_conf_plugins_security_ssl_http_enabled | ternary('true', 'false') }}" }
-  - { name: "plugins.security.ssl.http.pemcert_filepath", value: "{{ opensearch_conf_ssl_http_cert }}" }
-  - { name: "plugins.security.ssl.http.pemkey_filepath", value: "{{ opensearch_conf_ssl_http_key }}" }
-  - { name: "plugins.security.ssl.http.pemtrustedcas_filepath", value: "{{ opensearch_conf_ssl_http_ca_cert }}" }
+  - { name: "plugins.security.ssl.http.pemcert_filepath", value: "{{ opensearch_ssl_http_cert }}" }
+  - { name: "plugins.security.ssl.http.pemkey_filepath", value: "{{ opensearch_ssl_http_key }}" }
+  - { name: "plugins.security.ssl.http.pemtrustedcas_filepath", value: "{{ opensearch_ssl_http_ca_cert }}" }
   - { name: "plugins.security.allow_default_init_securityindex", value: "{{ opensearch_conf_plugins_security_allow_default_init_securityindex | ternary('true', 'false') }}" }
   - { name: "plugins.security.authcz.admin_dn", value: "{{ opensearch_conf_plugins_security_authcz_admin_dn }}" }
   - { name: "plugins.security.nodes_dn", value: "{{ opensearch_conf_plugins_security_nodes_dn }}" }

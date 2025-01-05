@@ -1,7 +1,7 @@
 ---
 
 opensearch_distfiles: "{{ opensearch_dir }}/distfiles"
-opensearch_ssl_dir: "{{ opensearch_dir }}/ssl"
+opensearch_self_signed_ssl_dir: "{{ opensearch_dir }}/ssl"
 opensearch_credentials_dir: "{{ opensearch_dir }}/credentials"
 
 opensearch_common_directories:
@@ -13,7 +13,7 @@ opensearch_common_directories:
     owner: "{{ opensearch_admin_user }}"
     group: "{{ opensearch_group }}"
     mode: "0755"
-  - path: "{{ opensearch_ssl_dir }}"
+  - path: "{{ opensearch_self_signed_ssl_dir }}"
     owner: "{{ opensearch_admin_user }}"
     group: "{{ opensearch_group }}"
     mode: "0750"

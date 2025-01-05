@@ -1,1 +1,43 @@
 ---
+
+- block:
+
+    - name: copy certificate from self-signed generated
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+        owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
+        group: "{{ opensearch_dashboards_group }}"
+        mode: "{{ item.mode | d('0400') }}"
+      loop:
+        - { src: "{{ opensearch_self_signed_ssl_node_cert }}", dest: "{{ opensearch_dashboards_ssl_server_cert }}" }
+        - { src: "{{ opensearch_self_signed_ssl_node_key }}", dest: "{{ opensearch_dashboards_ssl_server_key }}" }
+      register: t_opensearch_dashboards_ssl_update
+
+  when: opensearch_use_self_signed_ssl
+
+
+
+- block:
+
+    - name: copy certificate from specified location
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+        owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
+        group: "{{ opensearch_dashboards_group }}"
+        mode: "{{ item.mode | d('0400') }}"
+      loop:
+        - { src: "{{ opensearch_dashboards_ssl_server_cert_from }}", dest: "{{ opensearch_dashboards_ssl_server_cert }}" }
+        - { src: "{{ opensearch_dashboards_ssl_server_key_from }}", dest: "{{ opensearch_dashboards_ssl_server_key }}" }
+      register: t_opensearch_dashboards_ssl_update
+
+  when: not opensearch_use_self_signed_ssl
+
+
+
+- name: set ssl changed
+  set_fact:
+    t_opensearch_dashboards_ssl_changed: "{{ t_opensearch_dashboards_ssl_update.changed }}"

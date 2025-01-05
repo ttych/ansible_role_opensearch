@@ -10,6 +10,6 @@
     workspace_fs: "{{ opensearch_dir }}"
     workspace_directories: "{{ opensearch_common_directories }}"
 
-- include_tasks: ssl.yml
+- include_tasks: self_signed_ssl.yml
 
 - include_tasks: internal_users.yml

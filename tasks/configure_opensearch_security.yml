@@ -9,7 +9,7 @@
 
 
     - name: get current security settings
-      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -backup {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
+      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -backup {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_http_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
       environment:
         OPENSEARCH_JAVA_HOME: "{{ opensearch_dist_active_jdk }}"
       become: yes
@@ -60,7 +60,7 @@
 
 
     - name: set current security settings
-      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -cd {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
+      command: "{{ opensearch_dist_active_security_admin }} -h {{ opensearch_conf_network_host }} -cd {{ opensearch_config_security_dir }} -cacert {{ opensearch_ssl_http_ca_cert }} -cert {{ opensearch_ssl_admin_cert }} -key {{ opensearch_ssl_admin_key }} -icl -nhnv"
       environment:
         OPENSEARCH_JAVA_HOME: "{{ opensearch_dist_active_jdk }}"
       become: yes

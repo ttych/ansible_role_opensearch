@@ -10,8 +10,6 @@
     workspace_fs: "{{ opensearch_dir }}"
     workspace_directories: "{{ opensearch_dashboards_directories }}"
 
-- include_tasks: ssl.yml
-
 - include_tasks: install_opensearch_dashboards.yml
 
 - include_tasks: configure_opensearch_dashboards.yml

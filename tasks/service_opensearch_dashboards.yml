@@ -30,7 +30,7 @@
         state: restarted
       when:
         - not t_opensearch_dashboards_service_start.changed
-        - t_opensearch_dashbords_yml_changed or t_opensearch_dashboards_node_options_changed or t_opensearch_dashboards_service_deploy.changed
+        - t_opensearch_dashbords_yml_changed or t_opensearch_dashboards_node_options_changed or t_opensearch_dashboards_ssl_changed or t_opensearch_dashboards_service_deploy.changed
       register: t_opensearch_dashboards_service_restart
 
     - name: delay after start/restart
