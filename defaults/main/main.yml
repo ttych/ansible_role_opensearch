@@ -131,7 +131,7 @@ opensearch_conf_action_destructive_requires_name: false
 opensearch_conf_plugins_security_disabled: false
 opensearch_conf_plugins_security_ssl_http_enabled: true
 opensearch_conf_plugins_security_allow_default_init_securityindex: true
-opensearch_conf_plugins_security_audit_type: internal_opensearch
+opensearch_conf_plugins_security_audit_type: disabled  # internal_opensearch
 opensearch_conf_plugins_security_enable_snapshot_restore_privilege: true
 opensearch_conf_plugins_security_check_snapshot_restore_write_privileges: true
 opensearch_conf_plugins_security_authcz_admin_dn:
@@ -255,7 +255,7 @@ opensearch_config_security_internal_users:
 
 opensearch_service_type: "{{ ansible_service_mgr }}"
 opensearch_service_name: "{{ opensearch_name }}.service"
-opensearch_service_delay: 10
+opensearch_service_delay: 15
 
 
 
