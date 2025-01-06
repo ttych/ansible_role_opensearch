@@ -1,1 +1,59 @@
 ---
+
+- name: check installed dist
+  stat:
+    path: "{{ opensearch_dashboards_base_dir }}/{{ opensearch_dashboards_dist_name_ver }}/bin/opensearch-dashboards"
+  register: t_opensearch_dashboards_dist_available
+
+
+- block:
+    - name: check dist version
+      shell:
+        cmd: ./bin/opensearch-dashboards --version
+      args:
+        chdir: "{{ opensearch_dashboards_base_dir }}/{{ opensearch_dashboards_dist_name_ver }}"
+      changed_when: no
+      become: yes
+      become_user: "{{ opensearch_admin_user }}"
+      register: t_opensearch_dashboards_dist_version
+
+    - name: clean wrong dist
+      file:
+        path: "{{ opensearch_dashboards_base_dir }}/{{ opensearch_dashboards_dist_name_ver }}"
+        state: absent
+      when: t_opensearch_dashboards_dist_version.rc != 0 or t_opensearch_dashboards_dist_version.stdout != opensearch_dashboards_dist_version
+
+  when: t_opensearch_dashboards_dist_available.stat.exists
+
+
+- block:
+    - name: "download {{ opensearch_dashboards_dist_name }}"
+      get_url:
+        url: "{{ opensearch_dashboards_dist_url }}"
+        dest: "{{ opensearch_distfiles }}/{{ opensearch_dashboards_dist_archive }}"
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_dashboards_group }}"
+        mode: "0644"
+
+    - name: extract archive
+      unarchive:
+        remote_src: yes
+        src: "{{ opensearch_distfiles }}/{{ opensearch_dashboards_dist_archive }}"
+        dest: "{{ opensearch_dashboards_base_dir }}"
+        mode: "go-w"
+        owner: "{{ opensearch_admin_user }}"
+        group: "{{ opensearch_dashboards_group }}"
+      register: t_opensearch_dashboards_dist_extract
+
+  when: not t_opensearch_dashboards_dist_available.stat.exists or t_opensearch_dashboards_dist_version.rc != 0 or t_opensearch_dashboards_dist_version.stdout != opensearch_dist_version
+
+
+- name: link to active
+  file:
+    src: "{{ opensearch_dashboards_base_dir }}/{{opensearch_dashboards_dist_name_ver }}"
+    dest: "{{ opensearch_dashboards_dist_active }}"
+    force: yes
+    state: link
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_dashboards_group }}"
+  register: t_opensearch_dashboards_dist_active

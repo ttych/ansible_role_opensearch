@@ -1,0 +1,33 @@
+[Unit]
+Description=OpenSearch
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=forking
+RuntimeDirectory={{ opensearch_name }}
+WorkingDirectory={{ opensearch_base_dir }}
+
+Environment="OPENSEARCH_JAVA_HOME={{ opensearch_dist_active_jdk}}"
+Environment="OPENSEARCH_PATH_CONF={{ opensearch_config_dir }}"
+
+ExecStart={{ opensearch_dist_active }}/bin/opensearch -d
+
+User={{ opensearch_user }}
+Group={{ opensearch_group }}
+StandardOutput=journal
+StandardError=inherit
+LimitNOFILE=65535
+LimitNPROC=4096
+LimitAS=infinity
+LimitFSIZE=infinity
+LimitMEMLOCK=infinity
+TimeoutStopSec=0
+KillSignal=SIGTERM
+KillMode=process
+SendSIGKILL=no
+SuccessExitStatus=143
+TimeoutStartSec=75
+
+[Install]
+WantedBy=multi-user.target

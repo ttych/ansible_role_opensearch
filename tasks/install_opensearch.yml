@@ -1,8 +1,8 @@
 ---
 
-- name: check dist availability
+- name: check installed dist
   stat:
-    path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}/bin/opensearch"
+    path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name_ver }}/bin/opensearch"
   register: t_opensearch_dist_available
 
 - block:
@@ -10,13 +10,13 @@
       shell:
         cmd: ./bin/opensearch --version | sed -e 's/^Version. \([0-9.]*\),.*$/\1/g'
       args:
-        chdir: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+        chdir: "{{ opensearch_base_dir }}/{{ opensearch_dist_name_ver }}"
       changed_when: no
       register: t_opensearch_dist_version
 
     - name: clean wrong dist
       file:
-        path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
+        path: "{{ opensearch_base_dir }}/{{ opensearch_dist_name_ver }}"
         state: absent
       when: t_opensearch_dist_version.rc != 0 or t_opensearch_dist_version.stdout != opensearch_dist_version
 
@@ -41,14 +41,24 @@
         group: "{{ opensearch_group }}"
       register: t_opensearch_dist_extract
 
-    - name: link to active
-      file:
-        src: "{{ opensearch_base_dir }}/{{ opensearch_dist_name }}"
-        dest: "{{ opensearch_dist_active }}"
-        force: yes
-        state: link
-        owner: "{{ opensearch_admin_user }}"
-        group: "{{ opensearch_group }}"
-      register: t_opensearch_dist_active
-
   when: not t_opensearch_dist_available.stat.exists or t_opensearch_dist_version.rc != 0 or t_opensearch_dist_version.stdout != opensearch_dist_version
+
+- name: link to active
+  file:
+    src: "{{ opensearch_base_dir }}/{{ opensearch_dist_name_ver }}"
+    dest: "{{ opensearch_dist_active }}"
+    force: yes
+    state: link
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+  register: t_opensearch_dist_active
+
+- name: fix execution flag
+  file:
+    path: "{{ item }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0755"
+  loop:
+    - "{{ opensearch_dist_active_hash }}"
+    - "{{ opensearch_dist_active_security_admin }}"

@@ -1,0 +1,15 @@
+---
+
+- include_tasks: accounts.yml
+  vars:
+    accounts_groups: "{{ opensearch_groups }}"
+    accounts_users: "{{ opensearch_users }}"
+
+- include_tasks: workspace.yml
+  vars:
+    workspace_fs: "{{ opensearch_dir }}"
+    workspace_directories: "{{ opensearch_common_directories }}"
+
+- include_tasks: self_signed_ssl.yml
+
+- include_tasks: internal_users.yml

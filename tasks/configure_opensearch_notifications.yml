@@ -1,0 +1,6 @@
+---
+
+
+- name: set opensearch notifications changed
+  set_fact:
+    t_opensearch_notifications_changed: false

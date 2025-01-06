@@ -1,0 +1,26 @@
+---
+
+- name: read security file
+  slurp:
+    src: "{{ opensearch_config_security_dir }}/{{ security_config_file }}"
+  register: t_opensearch_config_security_file_content_raw
+
+- name: decode security file
+  set_fact:
+    t_opensearch_config_security_file_content: "{{ t_opensearch_config_security_file_content_raw.content | b64decode | from_yaml }}"
+
+- name: generate base security file from template
+  set_fact:
+    t_opensearch_config_security_base_content: "{{ lookup('template', 'opensearch/opensearch-security/' + security_config_file) | from_yaml }}"
+
+- name: merge security file with security base
+  set_fact:
+    t_opensearch_config_security_file_new_content: "{{ t_opensearch_config_security_file_content | combine(t_opensearch_config_security_base_content, recursive=True) }}"
+
+- name: save merge security content
+  copy:
+    content: "{{ t_opensearch_config_security_file_new_content | to_nice_yaml }}"
+    dest: "{{ opensearch_config_security_dir }}/{{ security_config_file }}"
+    owner: "{{ opensearch_admin_user }}"
+    group: "{{ opensearch_group }}"
+    mode: "0600"

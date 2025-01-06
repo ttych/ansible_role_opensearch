@@ -1,0 +1,28 @@
+---
+
+opensearch_use_self_signed_ssl: yes
+
+opensearch_self_signed_ssl_ca_key_filename: "ca.key"
+opensearch_self_signed_ssl_ca_key: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_ca_key_filename }}"
+opensearch_self_signed_ssl_ca_cert_filename: "ca.crt"
+opensearch_self_signed_ssl_ca_cert: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_ca_cert_filename }}"
+# opensearch_self_signed_ssl_ca_dn: "/O=local/OU=pki/CN=ca"
+opensearch_self_signed_ssl_ca_dn: "CN=ca,OU=pki,O=local"
+opensearch_self_signed_ssl_ca_key_size: 4096
+opensearch_self_signed_ssl_ca_cert_days: 3690
+opensearch_self_signed_ssl_admin_key_filename: "admin.key"
+opensearch_self_signed_ssl_admin_key: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_admin_key_filename }}"
+opensearch_self_signed_ssl_admin_cert_filename: "admin.crt"
+opensearch_self_signed_ssl_admin_cert: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_admin_cert_filename }}"
+# opensearch_self_signed_ssl_admin_dn: "/O=local/OU=data/CN=admin"
+opensearch_self_signed_ssl_admin_dn: "CN=admin,OU=data,O=local"
+opensearch_self_signed_ssl_admin_key_size: 4096
+opensearch_self_signed_ssl_admin_cert_days: 3690
+opensearch_self_signed_ssl_node_key_filename: "node.key"
+opensearch_self_signed_ssl_node_key: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_node_key_filename }}"
+opensearch_self_signed_ssl_node_cert_filename: "node.crt"
+opensearch_self_signed_ssl_node_cert: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_node_cert_filename }}"
+# opensearch_self_signed_ssl_node_dn: "/O=local/OU=data/CN={{ opensearch_node_fqdn }}"
+opensearch_self_signed_ssl_node_dn: "CN={{ opensearch_node_fqdn }},OU=data,O=local"
+opensearch_self_signed_ssl_node_key_size: 4096
+opensearch_self_signed_ssl_node_cert_days: 3690

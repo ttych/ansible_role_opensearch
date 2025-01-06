@@ -1,0 +1,6 @@
+---
+
+- include_tasks: internal_users_password.yml
+  loop: "{{ opensearch_internal_users }}"
+  vars:
+    internal_user: "{{ item }}"

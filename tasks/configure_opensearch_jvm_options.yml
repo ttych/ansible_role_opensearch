@@ -3,11 +3,11 @@
 - name: "stat {{ opensearch_config_jvm_options }}"
   stat:
     path: "{{ opensearch_config_jvm_options }}"
-  register: t_opensearch_jvm_options_stat
+  register: t_opensearch_config_jvm_options
 
 - block:
 
-    - name: init with default file
+    - name: init jvm.options
       copy:
         src: "{{ opensearch_dist_active }}/config/jvm.options"
         dest: "{{ opensearch_config_jvm_options }}"
@@ -15,8 +15,9 @@
         owner: "{{ opensearch_admin_user }}"
         group: "{{ opensearch_group }}"
         mode: "0640"
+      register: t_opensearch_jvm_options_init
 
-  when: not t_opensearch_jvm_options_stat.stat.exists
+  when: not t_opensearch_config_jvm_options.stat.exists
 
 
 - name: set jvm.options
@@ -27,3 +28,10 @@
     state: "{{ item.state | d('present') }}"
     backrefs: "{{ item.backrefs | d(false) }}"
   loop: "{{ opensearch_conf_jvm_options }}"
+  register: t_opensearch_jvm_options_update
+
+
+
+- name: set jvm.options changed
+  set_fact:
+    t_opensearch_jvm_options_changed: "{{ t_opensearch_jvm_options_init.changed or t_opensearch_jvm_options_update.changed }}"

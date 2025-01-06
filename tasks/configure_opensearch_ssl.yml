@@ -1,0 +1,77 @@
+---
+
+- block:
+
+    - name: copy certificate from self-signed generated
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+        owner: "{{ item.owner | d(opensearch_user) }}"
+        group: "{{ opensearch_group }}"
+        mode: "{{ item.mode | d('0400') }}"
+      loop:
+        - { src: "{{ opensearch_self_signed_ssl_node_cert }}", dest: "{{ opensearch_ssl_transport_cert }}" }
+        - { src: "{{ opensearch_self_signed_ssl_node_key }}", dest: "{{ opensearch_ssl_transport_key }}" }
+        - { src: "{{ opensearch_self_signed_ssl_ca_cert }}", dest: "{{ opensearch_ssl_transport_ca_cert }}", mode: '0444' }
+        - { src: "{{ opensearch_self_signed_ssl_node_cert }}", dest: "{{ opensearch_ssl_http_cert }}" }
+        - { src: "{{ opensearch_self_signed_ssl_node_key }}", dest: "{{ opensearch_ssl_http_key }}" }
+        - { src: "{{ opensearch_self_signed_ssl_ca_cert }}", dest: "{{ opensearch_ssl_http_ca_cert }}", mode: '0444' }
+        - { src: "{{ opensearch_self_signed_ssl_admin_cert }}", dest: "{{ opensearch_ssl_admin_cert }}", owner: "{{ opensearch_admin_user }}" }
+        - { src: "{{ opensearch_self_signed_ssl_admin_key }}", dest: "{{ opensearch_ssl_admin_key }}", owner: "{{ opensearch_admin_user }}" }
+      register: t_opensearch_ssl_update
+
+  when: opensearch_use_self_signed_ssl
+
+
+
+- block:
+
+    - name: copy certificate from specified location
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        remote_src: yes
+        owner: "{{ item.owner | d(opensearch_user) }}"
+        group: "{{ opensearch_group }}"
+        mode: "{{ item.mode | d('0400') }}"
+      loop:
+        - { src: "{{ opensearch_ssl_transport_cert_from }}", dest: "{{ opensearch_ssl_transport_cert }}" }
+        - { src: "{{ opensearch_ssl_transport_key_from }}", dest: "{{ opensearch_ssl_transport_key }}" }
+        - { src: "{{ opensearch_ssl_transport_ca_cert_from }}", dest: "{{ opensearch_ssl_transport_ca_cert }}", mode: '0444' }
+        - { src: "{{ opensearch_ssl_http_cert_from }}", dest: "{{ opensearch_ssl_http_cert }}" }
+        - { src: "{{ opensearch_ssl_http_key_from }}", dest: "{{ opensearch_ssl_http_key }}" }
+        - { src: "{{ opensearch_ssl_http_ca_cert_from }}", dest: "{{ opensearch_ssl_http_ca_cert }}", mode: '0444' }
+        - { src: "{{ opensearch_ssl_admin_cert_from }}", dest: "{{ opensearch_ssl_admin_cert }}", owner: "{{ opensearch_admin_user }}" }
+        - { src: "{{ opensearch_ssl_admin_key_from }}", dest: "{{ opensearch_ssl_admin_key }}", owner: "{{ opensearch_admin_user }}" }
+      register: t_opensearch_ssl_update
+
+  when: not opensearch_use_self_signed_ssl
+
+
+
+- name: extract node dn
+  shell:
+    cmd: "openssl x509 -in {{ opensearch_ssl_transport_cert }} -noout -subject -nameopt RFC2253 | sed 's/^subject=//'"
+  changed_when: no
+  register: t_opensearch_ssl_node_dn
+
+- name: set node dn
+  set_fact:
+    opensearch_ssl_node_dn: "{{ t_opensearch_ssl_node_dn.stdout | trim }}"
+
+- name: extract admin dn
+  shell:
+    cmd: "openssl x509 -in {{ opensearch_ssl_admin_cert }} -noout -subject -nameopt RFC2253 | sed 's/^subject=//'"
+  changed_when: no
+  register: t_opensearch_ssl_admin_dn
+
+- name: set admin dn
+  set_fact:
+    opensearch_ssl_admin_dn: "{{ t_opensearch_ssl_admin_dn.stdout | trim }}"
+
+
+
+- name: set systcl changed
+  set_fact:
+    t_opensearch_ssl_changed: "{{ t_opensearch_ssl_update.changed }}"

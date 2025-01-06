@@ -11,4 +11,11 @@
     value: 262144
     sysctl_set: true
     state: present
+  register: t_opensearch_sysctl_max_map_count
   when: t_opensearch_sysctl_max_map_count.stdout | int < 262144
+
+
+
+- name: set systcl changed
+  set_fact:
+    t_opensearch_sysctl_changed: "{{ (t_opensearch_sysctl_max_map_count is defined) and t_opensearch_sysctl_max_map_count.changed }}"
