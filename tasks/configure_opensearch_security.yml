@@ -40,7 +40,7 @@
     #     - not t_opensearch_config_security_admin_password_file.stat.exists
 
 
-    - name: init security files from base
+    - name: init security files from template
       template:
         src: "opensearch/opensearch-security/{{ item }}"
         dest: "{{ opensearch_config_security_dir }}/{{ item }}"

@@ -1,6 +1,10 @@
 ---
 
-opensearch_use_self_signed_ssl: yes
+opensearch_ssl: yes
+opensearch_dashboards_ssl: "{{ opensearch_ssl }}"
+
+
+opensearch_use_self_signed_ssl: no
 
 opensearch_self_signed_ssl_ca_key_filename: "ca.key"
 opensearch_self_signed_ssl_ca_key: "{{ opensearch_self_signed_ssl_dir }}/{{ opensearch_self_signed_ssl_ca_key_filename }}"

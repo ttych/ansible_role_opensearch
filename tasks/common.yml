@@ -11,5 +11,3 @@
     workspace_directories: "{{ opensearch_common_directories }}"
 
 - include_tasks: self_signed_ssl.yml
-
-- include_tasks: internal_users.yml

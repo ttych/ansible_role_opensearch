@@ -14,7 +14,7 @@
         chdir: "{{ opensearch_dashboards_base_dir }}/{{ opensearch_dashboards_dist_name_ver }}"
       changed_when: no
       become: yes
-      become_user: "{{ opensearch_admin_user }}"
+      become_user: "{{ opensearch_dashboards_user }}"
       register: t_opensearch_dashboards_dist_version
 
     - name: clean wrong dist

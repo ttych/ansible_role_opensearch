@@ -1,3 +1,5 @@
 ---
 
+- include_tasks: internal_users.yml
+
 - include_tasks: configure_opensearch_security.yml

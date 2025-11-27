@@ -26,7 +26,7 @@
         user_home_name: "{{ user_home | basename }}"
 
     - name: "get associated dataset for {{ user_home_base }}"
-      shell: zfs list -H "{{ user_home_base }}" | awk '$5 = "{{ user_home_base }}" {print $1}'
+      shell: zfs list -H "{{ user_home_base }}" | awk '$5 == "{{ user_home_base }}" {print $1}'
       register: user_home_base_dataset
       changed_when: no
 

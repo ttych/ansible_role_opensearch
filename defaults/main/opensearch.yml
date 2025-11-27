@@ -3,6 +3,7 @@
 want_opensearch: no
 want_opensearch_dashboards: "{{ want_opensearch }}"
 
+opensearch_version: 2.19.4
 
 opensearch_name: opensearch
 opensearch_dir: "/app/{{ opensearch_name }}"
@@ -94,7 +95,7 @@ opensearch_config_security_files:
   - tenants.yml
   - whitelist.yml
 
-opensearch_dist_version: 2.18.0
+opensearch_dist_version: "{{ opensearch_version }}"
 opensearch_dist_arch: "{{ (ansible_architecture == 'x86_64') | ternary('x64', ansible_architecture) }}"
 opensearch_dist_name: "opensearch"
 opensearch_dist_name_ver: "{{ opensearch_dist_name }}-{{ opensearch_dist_version }}"
@@ -260,4 +261,4 @@ opensearch_service_delay: 15
 
 
 
-opensearch_admin_user: admin
+opensearch_admin_user: root

@@ -2,42 +2,53 @@
 
 - block:
 
-    - name: copy certificate from self-signed generated
-      copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        remote_src: yes
-        owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
-        group: "{{ opensearch_dashboards_group }}"
-        mode: "{{ item.mode | d('0400') }}"
-      loop:
-        - { src: "{{ opensearch_self_signed_ssl_node_cert }}", dest: "{{ opensearch_dashboards_ssl_server_cert }}" }
-        - { src: "{{ opensearch_self_signed_ssl_node_key }}", dest: "{{ opensearch_dashboards_ssl_server_key }}" }
-      register: t_opensearch_dashboards_ssl_update
+    - block:
 
-  when: opensearch_use_self_signed_ssl
+        - name: copy certificate from self-signed generated
+          copy:
+            src: "{{ item.src }}"
+            dest: "{{ item.dest }}"
+            remote_src: yes
+            owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
+            group: "{{ opensearch_dashboards_group }}"
+            mode: "{{ item.mode | d('0400') }}"
+          loop:
+            - { src: "{{ opensearch_self_signed_ssl_node_cert }}", dest: "{{ opensearch_dashboards_ssl_server_cert }}" }
+            - { src: "{{ opensearch_self_signed_ssl_node_key }}", dest: "{{ opensearch_dashboards_ssl_server_key }}" }
+          register: t_opensearch_dashboards_ssl_selfsigned_update
+
+      when: opensearch_use_self_signed_ssl
 
 
+    - block:
 
-- block:
+        - block:
 
-    - name: copy certificate from specified location
-      copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        remote_src: yes
-        owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
-        group: "{{ opensearch_dashboards_group }}"
-        mode: "{{ item.mode | d('0400') }}"
-      loop:
-        - { src: "{{ opensearch_dashboards_ssl_server_cert_from }}", dest: "{{ opensearch_dashboards_ssl_server_cert }}" }
-        - { src: "{{ opensearch_dashboards_ssl_server_key_from }}", dest: "{{ opensearch_dashboards_ssl_server_key }}" }
-      register: t_opensearch_dashboards_ssl_update
+            - name: deploy opensearch transport certificate
+              ansible.builtin.copy:
+                dest: "{{ item.dest }}"
+                content: "{{ item.content }}"
+                owner: "{{ item.owner | d(opensearch_dashboards_user) }}"
+                group: "{{ opensearch_dashboards_group }}"
+                mode: "0400"
+              loop:
+                - dest: "{{ opensearch_dashboards_ssl_server_cert }}"
+                  content: "{{ dashboards_certificate_server['certificate'] }}"
+                - dest: "{{ opensearch_dashboards_ssl_server_key }}"
+                  content: "{{ dashboards_certificate_server['key'] }}"
+              register: t_opensearch_dashboards_ssl_update
 
-  when: not opensearch_use_self_signed_ssl
+          when:
+            - dashboards_certificate_server is defined
+            - dashboards_certificate_server is not none
+            # - dashboards_certificate_server_ca is defined
+            # - dashboards_certificate_server_ca is not none
 
+      when: not opensearch_use_self_signed_ssl
+
+  when: opensearch_ssl
 
 
 - name: set ssl changed
   set_fact:
-    t_opensearch_dashboards_ssl_changed: "{{ t_opensearch_dashboards_ssl_update.changed }}"
+    t_opensearch_dashboards_ssl_changed: "{{ t_opensearch_dashboards_ssl_selfsigned_update.changed or t_opensearch_dashboards_ssl_update.changed }}"
