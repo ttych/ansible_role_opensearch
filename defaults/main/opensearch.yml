@@ -128,11 +128,11 @@ opensearch_conf_discovery_type: single-node
 opensearch_conf_discovery_seed_hosts: ["127.0.0.1", "[::1]"]
 opensearch_conf_cluster_initial_cluster_manager_nodes: []
 opensearch_conf_bootstrap_memory_lock: true
+opensearch_conf_action_auto_create_index: true
 opensearch_conf_action_destructive_requires_name: false
 opensearch_conf_plugins_security_disabled: false
 opensearch_conf_plugins_security_ssl_http_enabled: true
 opensearch_conf_plugins_security_allow_default_init_securityindex: true
-opensearch_conf_plugins_security_audit_type: disabled  # internal_opensearch
 opensearch_conf_plugins_security_enable_snapshot_restore_privilege: true
 opensearch_conf_plugins_security_check_snapshot_restore_write_privileges: true
 opensearch_conf_plugins_security_authcz_admin_dn:
@@ -142,6 +142,23 @@ opensearch_conf_plugins_security_nodes_dn:
 opensearch_conf_plugins_security_restapi_roles_enabled:
   - all_access
   - security_rest_api_access
+opensearch_conf_plugins_security_system_indices_enabled: true
+opensearch_conf_plugins_security_system_indices_indices:
+  - .opendistro_security
+opensearch_conf_plugins_security_system_indices_permission_enabled: true
+opensearch_conf_plugins_security_audit_type: internal_opensearch
+opensearch_conf_plugins_security_audit_config_enable_rest: true
+opensearch_conf_plugins_security_audit_config_enable_transport: true
+opensearch_conf_plugins_security_audit_config_index: .opensearch_security_audit
+opensearch_conf_plugins_security_audit_config_resolve_indices: true
+opensearch_conf_plugins_security_audit_config_log_request_body: true
+# audit.type: webhook
+opensearch_conf_plugins_security_audit_config_webhooks_url: "https://siem.company.com/api/audit"
+opensearch_conf_plugins_security_audit_config_webhooks_header_authorization: "Bearer token123"
+# audit.type: log4j
+opensearch_conf_plugins_security_audit_config_log4j_logger_name: "security-audit"
+opensearch_conf_plugins_security_audit_config_log4j_level: "INFO"
+opensearch_conf_compatibility_override_main_response_version: true
 opensearch_ssl_transport_cert: "{{ opensearch_config_ssl_dir }}/transport.crt"
 opensearch_ssl_transport_key: "{{ opensearch_config_ssl_dir }}/transport.key"
 opensearch_ssl_transport_ca_cert: "{{ opensearch_config_ssl_dir }}/transport.ca.crt"
@@ -164,6 +181,7 @@ opensearch_conf_opensearch_yml_settings:
   - { name: "discovery.type", value: "{{ opensearch_conf_discovery_type | d(None) }}", state: "{{ ((opensearch_conf_discovery_type | d('')) != '') | ternary('present', 'absent') }}" }
   - { name: "cluster.initial_cluster_manager_nodes", value: "{{  opensearch_conf_cluster_initial_cluster_manager_nodes }}", state: "{{ ((opensearch_conf_discovery_type|d('')) == 'single-node') | ternary('absent', 'present') }}" }
   - { name: "gateway.recover_after_nodes", value: "{{ opensearch_conf_gateway_recover_after_nodes | d(None) }}", state: "{{ ((opensearch_conf_gateway_recover_after_nodes | d('')) != '') | ternary('present', 'absent') }}" }
+  - { name: "action.auto_create_index", value: "{{ opensearch_conf_action_auto_create_index | ternary('true', 'false') }}" }
   - { name: "action.destructive_requires_name", value: "{{ opensearch_conf_action_destructive_requires_name | ternary('true', 'false') }}" }
   - { name: "plugins.security.disabled", value: "{{ opensearch_conf_plugins_security_disabled | ternary('true', 'false') }}" }
   #
@@ -177,12 +195,27 @@ opensearch_conf_opensearch_yml_settings:
   - { name: "plugins.security.allow_default_init_securityindex", value: "{{ opensearch_conf_plugins_security_allow_default_init_securityindex | ternary('true', 'false') }}" }
   - { name: "plugins.security.authcz.admin_dn", value: "{{ opensearch_conf_plugins_security_authcz_admin_dn }}" }
   - { name: "plugins.security.nodes_dn", value: "{{ opensearch_conf_plugins_security_nodes_dn }}" }
-  - { name: "plugins.security.audit.type", value: "{{ opensearch_conf_plugins_security_audit_type }}" }
-# plugins.security.audit.enable_rest: true
-# plugins.security.audit.enable_transport: true
   - { name: "plugins.security.enable_snapshot_restore_privilege", value: "{{ opensearch_conf_plugins_security_enable_snapshot_restore_privilege | ternary('true', 'false') }}" }
   - { name: "plugins.security.check_snapshot_restore_write_privileges", value: "{{ opensearch_conf_plugins_security_check_snapshot_restore_write_privileges | ternary('true', 'false') }}" }
   - { name: "plugins.security.restapi.roles_enabled", value: "{{ opensearch_conf_plugins_security_restapi_roles_enabled }}" }
+
+  - { name: "plugins.security.system_indices.enabled", value: "{{ opensearch_conf_plugins_security_system_indices_enabled | ternary('true', 'false') }}" }
+  - { name: "plugins.security.system_indices.indices", value: "{{ opensearch_conf_plugins_security_system_indices_indices }}" }
+  - { name: "plugins.security.system_indices.permission.enabled", value: "{{ opensearch_conf_plugins_security_system_indices_permission_enabled | ternary('true', 'false') }}" }
+  - { name: "plugins.security.audit.type", value: "{{ opensearch_conf_plugins_security_audit_type }}" }
+  - { name: "plugins.security.audit.config.enable_rest", value: "{{ opensearch_conf_plugins_security_audit_config_enable_rest }}" }
+  - { name: "plugins.security.audit.config.enable_transport", value: "{{ opensearch_conf_plugins_security_audit_config_enable_transport }}" }
+  - { name: "plugins.security.audit.config.index", value: "{{ opensearch_conf_plugins_security_audit_config_index }}", state: "{{ (opensearch_conf_plugins_security_audit_type == 'internal_opensearch') | ternary('present', 'absent') }}" }
+
+  - { name: "plugins.security.audit.config.flush_interval", value: "", state: absent }
+
+  - { name: "plugins.security.audit.config.resolve_indices", value: "{{ opensearch_conf_plugins_security_audit_config_resolve_indices }}" }
+  - { name: "plugins.security.audit.config.log_request_body", value: "{{ opensearch_conf_plugins_security_audit_config_log_request_body }}" }
+  - { name: "plugins.security.audit.config.webhooks.url", value: "{{ opensearch_conf_plugins_security_audit_config_webhooks_url }}", state: "{{ (opensearch_conf_plugins_security_audit_type == 'webhook') | ternary('present', 'absent') }}" }
+  - { name: "plugins.security.audit.config.webhooks.header.Authorization", value: "{{ opensearch_conf_plugins_security_audit_config_webhooks_header_authorization }}", state: "{{ (opensearch_conf_plugins_security_audit_type == 'webhook') | ternary('present', 'absent') }}" }
+  - { name: "plugins.security.audit.config.log4j.logger_name", value: "{{ opensearch_conf_plugins_security_audit_config_log4j_logger_name }}", state: "{{ (opensearch_conf_plugins_security_audit_type == 'log4j') | ternary('present', 'absent') }}" }
+  - { name: "plugins.security.audit.config.log4j.level", value: "{{ opensearch_conf_plugins_security_audit_config_log4j_level }}", state: "{{ (opensearch_conf_plugins_security_audit_type == 'log4j') | ternary('present', 'absent') }}" }
+  - { name: "compatibility.override_main_response_version", value: "{{ opensearch_conf_compatibility_override_main_response_version | ternary('true', 'false') }}" }
 
 opensearch_config_security_audit_enabled: yes
 opensearch_config_security_audit_enable_rest: yes
